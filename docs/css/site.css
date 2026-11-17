@@ -1,19 +1,21 @@
 /* ============================================================
-   全局样式：简约清爽的学生作业风格 + 浅色/深色双主题
-   - 颜色全部走 CSS 变量，切换主题由 Bootstrap 的
-     <html data-bs-theme="dark"> 控制，本文件覆盖自定义变量即可整体换肤
-   - 无渐变、无悬停动画，卡片加大留白与间距
+   全局样式：清爽学生工作台风格 + 浅色/深色双主题
+   - 颜色全部走 CSS 变量，切换主题由 <html data-bs-theme> 控制
+   - 卡片圆角 14px、柔和淡阴影、宽松留白、hover 轻微上浮
+   - 主体自适应网格：大屏多栏 / 平板两栏 / 手机单列
    ============================================================ */
 
-/* ---------- 浅色主题变量（默认） ---------- */
+/* ---------- 浅色主题变量（主风格） ---------- */
 :root {
-    --accent: #3b82f6;        /* 唯一点缀色（蓝） */
-    --page-bg: #f5f7fa;       /* 页面背景 */
+    --accent: #4080d0;        /* 主色调：低饱和淡蓝 */
+    --accent-soft: #eaf2fb;   /* 主色淡底 */
+    --accent-hover: #3468b0;
+    --page-bg: #f8fafc;       /* 页面背景 */
     --card-bg: #ffffff;       /* 卡片背景 */
-    --border: #e5e9f0;        /* 卡片细边框 */
+    --border: #e6eaf1;        /* 卡片细边框 */
     --text-main: #334155;     /* 主文字 */
-    --text-muted: #94a3b8;    /* 次要文字 */
-    --head-bg: #f8fafc;       /* 表头/卡片头背景 */
+    --text-muted: #8b98ab;    /* 次要文字 */
+    --head-bg: #f6f8fb;       /* 表头/卡片头背景 */
     --done-bg: #f1f5f9;       /* 已完成待办底色 */
     --soon-bg: #fff8e1;       /* 临期待办底色（黄） */
     --soon-border: #ffc107;
@@ -21,24 +23,45 @@
     --overdue-border: #dc3545;
     --today-bg: #e8f4ec;      /* 今日课程行底色（绿） */
     --today-border: #2e9e57;
+    --shadow: 0 2px 10px rgba(30, 55, 90, 0.06);        /* 卡片常态淡阴影 */
+    --shadow-hover: 0 8px 22px rgba(30, 55, 90, 0.12);  /* hover 上浮阴影 */
+
+    /* 课程低饱和色块（参考 B：不同课程不同色） */
+    --subj1-bg: #e8f1fb; --subj1-fg: #3a6ea5;
+    --subj2-bg: #e7f4ec; --subj2-fg: #3d8f63;
+    --subj3-bg: #fdf3e0; --subj3-fg: #b07d2b;
+    --subj4-bg: #efeaf9; --subj4-fg: #7460bd;
+    --subj5-bg: #fbeaef; --subj5-fg: #c05a78;
+    --subj6-bg: #e3f2f1; --subj6-fg: #35857f;
 }
 
-/* ---------- 深色主题变量 ---------- */
+/* ---------- 深色主题变量（与浅色一一对应） ---------- */
 [data-bs-theme="dark"] {
-    --accent: #5b8def;
-    --page-bg: #171c26;
-    --card-bg: #1f2633;
-    --border: #323b4d;
-    --text-main: #d5dbe6;
+    --accent: #8ab4f0;        /* 柔和浅蓝，保证可读性 */
+    --accent-soft: #223046;
+    --accent-hover: #a5c6f5;
+    --page-bg: #12151c;
+    --card-bg: #1e222d;
+    --border: #2e3544;
+    --text-main: #d7dde8;
     --text-muted: #8a94a6;
-    --head-bg: #262f3f;
-    --done-bg: #262f3f;
+    --head-bg: #242a38;
+    --done-bg: #262d3c;
     --soon-bg: #3a3012;
     --soon-border: #d9a406;
     --overdue-bg: #40232a;
     --overdue-border: #e35d6a;
-    --today-bg: #23362c;
+    --today-bg: #223429;
     --today-border: #3fae6e;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+    --shadow-hover: 0 8px 22px rgba(0, 0, 0, 0.5);
+
+    --subj1-bg: #24344c; --subj1-fg: #9cc3f0;
+    --subj2-bg: #21382c; --subj2-fg: #8fd0a8;
+    --subj3-bg: #3d3218; --subj3-fg: #e6c07a;
+    --subj4-bg: #322b4a; --subj4-fg: #bfafe8;
+    --subj5-bg: #442832; --subj5-fg: #f0a8bd;
+    --subj6-bg: #1f3b39; --subj6-fg: #85cec7;
 }
 
 body {
@@ -47,57 +70,239 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    /* 深浅切换流畅：背景与文字颜色过渡 */
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 main {
     flex: 1; /* 页脚贴底 */
 }
 
-/* 顶部导航：纯色简洁 */
+/* 顶部导航：浅色用主色底，深色用卡片底避免刺眼 */
 .navbar-app {
     background-color: var(--accent);
+    transition: background-color 0.3s ease;
 }
 
-/* ==================== 卡片：白底细边框 + 加大留白 ==================== */
+[data-bs-theme="dark"] .navbar-app {
+    background-color: #1a1e27;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ==================== 卡片通用：圆角 14px + 柔和阴影 + hover 上浮 ==================== */
 .card {
     background: var(--card-bg);
     border: 1px solid var(--border);
-    border-radius: 0.75rem;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    transition: transform 0.25s ease, box-shadow 0.25s ease,
+                background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.wb-grid .card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
 }
 
 .card-header {
     background-color: var(--head-bg);
     border-bottom: 1px solid var(--border);
+    border-radius: 14px 14px 0 0 !important;
     font-weight: 600;
-    padding: 1rem 1.5rem; /* 卡片头留白加大 */
+    padding: 0.9rem 1.4rem;
+    transition: background-color 0.3s ease;
 }
 
-/* ==================== 时间/天气卡片 ==================== */
-#clock {
-    font-variant-numeric: tabular-nums; /* 等宽数字，跳动不抖动 */
-    letter-spacing: 0.05em;
+/* 模块标题图标：统一使用主题主色 */
+.card-header > .bi:first-child {
     color: var(--accent);
-    font-weight: 700;
+    margin-right: 0.45rem;
 }
 
-#dateLine {
+.card-body {
+    padding: 1.4rem;
+}
+
+/* ==================== 欢迎栏 ==================== */
+.wb-welcome .card-body {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.1rem 1.4rem;
+}
+
+.wb-greet-icon {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+}
+
+.wb-greet {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text-main);
+    line-height: 1.3;
+}
+
+.wb-greet-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+}
+
+/* 欢迎栏右上角主题切换按钮 */
+.wb-theme-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--head-bg);
+    color: var(--accent);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: transform 0.25s ease, background-color 0.3s ease;
+}
+
+.wb-theme-btn:hover {
+    transform: rotate(20deg) scale(1.06);
+    color: var(--accent);
+    background: var(--accent-soft);
+}
+
+/* ==================== 统计指标小卡片 ==================== */
+.wb-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.wb-stat .card-body {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.9rem 1.1rem;
+}
+
+.wb-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: var(--accent-soft);
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.25rem;
+    flex-shrink: 0;
+}
+
+.wb-stat-icon.wb-stat-done { background: var(--today-bg); color: var(--today-border); }
+.wb-stat-icon.wb-stat-course { background: var(--subj4-bg); color: var(--subj4-fg); }
+
+.wb-stat-num {
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-main);
+}
+
+.wb-stat-label {
+    font-size: 0.8rem;
     color: var(--text-muted);
 }
 
-#weatherIcon {
+/* ==================== 主体自适应网格 ====================
+   12 列网格：
+   大屏(≥992px)：待办占左 7 列跨两行；时钟/天气、语录占右 5 列；
+                 倒计时、链接各占一半；课表、成绩通栏
+   平板(576~991)：待办通栏，其余两栏
+   手机(<576px)：全部单列堆叠 */
+.wb-grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.wb-cell { min-width: 0; } /* 防止内容撑破网格 */
+.wb-cell > .card { height: 100%; }
+
+/* 默认（手机）：全部单列 */
+.wb-cell { grid-column: span 12; }
+
+/* 平板：两栏 */
+@media (min-width: 576px) {
+    .wb-clock, .wb-quote, .wb-countdown, .wb-links { grid-column: span 6; }
+}
+
+/* 大屏：多栏 */
+@media (min-width: 992px) {
+    .wb-todos { grid-column: span 7; grid-row: span 2; }
+    .wb-clock, .wb-quote { grid-column: span 5; }
+    .wb-countdown, .wb-links { grid-column: span 6; }
+    .wb-schedule, .wb-grades { grid-column: span 12; }
+}
+
+/* ==================== 时钟 + 天气卡片 ==================== */
+.wb-clock-num {
+    font-size: 2.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums; /* 等宽数字，跳动不抖动 */
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    line-height: 1.2;
+}
+
+.wb-clock-date {
+    color: var(--text-muted);
+    font-size: 0.92rem;
+    margin-top: 0.15rem;
+}
+
+.wb-divider {
+    border-color: var(--border);
+    opacity: 0.8;
+    margin: 0.9rem 0;
+}
+
+.wb-weather-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.wb-weather-icon {
+    font-size: 2rem;
     color: var(--accent);
 }
 
-/* ==================== 待办事项状态样式 ==================== */
-/* 未完成：正常底色 */
-.todo-active {
-    background-color: var(--card-bg);
+/* ==================== 学习语录卡片 ==================== */
+.wb-quote-text {
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--text-main);
+    line-height: 1.7;
+    padding: 0.6rem 0.9rem;
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 10px 10px 0;
 }
 
-/* 已完成：浅灰底 + 删除线 + 灰字 */
-.todo-done {
-    background-color: var(--done-bg);
-}
+/* ==================== 待办事项状态样式（保留原标记规则） ==================== */
+.todo-active { background-color: var(--card-bg); }
+
+.todo-done { background-color: var(--done-bg); }
 
 .todo-done .todo-title {
     text-decoration: line-through;
@@ -125,14 +330,42 @@ main {
 .legend-soon { color: var(--soon-border); }
 .legend-overdue { color: var(--overdue-border); }
 
-/* ==================== 课程表：今日课程高亮 ==================== */
-.course-today {
-    background-color: var(--today-bg) !important;
-}
+/* ==================== 课程表：今日高亮 + 低饱和课程色块 ==================== */
+.course-today { background-color: var(--today-bg) !important; }
 
 .course-today td:first-child {
     border-left: 4px solid var(--today-border);
 }
+
+/* 星期小标签 */
+.subj-day {
+    display: inline-block;
+    font-size: 0.8rem;
+    padding: 0.12rem 0.55rem;
+    border-radius: 8px;
+    background: var(--head-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+}
+
+/* 课程名称色块：同一门课颜色固定，低饱和不刺眼 */
+.subj {
+    display: inline-block;
+    padding: 0.18rem 0.7rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+
+.subj-1 { background: var(--subj1-bg); color: var(--subj1-fg); }
+.subj-2 { background: var(--subj2-bg); color: var(--subj2-fg); }
+.subj-3 { background: var(--subj3-bg); color: var(--subj3-fg); }
+.subj-4 { background: var(--subj4-bg); color: var(--subj4-fg); }
+.subj-5 { background: var(--subj5-bg); color: var(--subj5-fg); }
+.subj-6 { background: var(--subj6-bg); color: var(--subj6-fg); }
+
+.wb-period { color: var(--text-muted); font-size: 0.88rem; }
+.wb-room-icon { color: var(--text-muted); margin-right: 0.3rem; }
 
 /* ==================== 链接分组小标题 ==================== */
 .link-group-title {
@@ -144,25 +377,34 @@ main {
     margin-bottom: 0.25rem;
 }
 
-/* ==================== 表单元素：简洁风格 ==================== */
+.wb-link-icon { color: var(--accent); }
+
+/* ==================== 表单元素 ==================== */
 .form-control,
 .form-select {
     border-color: var(--border);
-    border-radius: 0.375rem;
+    border-radius: 10px;
     font-size: 0.9rem;
     background-color: var(--card-bg);
     color: var(--text-main);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.3s ease;
 }
 
 .form-control:focus,
 .form-select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.15);
+    box-shadow: 0 0 0 0.15rem rgba(64, 128, 208, 0.18);
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    box-shadow: 0 0 0 0.15rem rgba(138, 180, 240, 0.22);
 }
 
 .btn {
     font-size: 0.9rem;
-    border-radius: 0.375rem;
+    border-radius: 10px;
+    transition: all 0.2s ease;
 }
 
 .btn-primary {
@@ -171,9 +413,31 @@ main {
 }
 
 .btn-primary:hover {
-    background-color: #2f6fe0;
-    border-color: #2f6fe0;
+    background-color: var(--accent-hover);
+    border-color: var(--accent-hover);
 }
+
+/* 深色下主按钮：浅蓝底 + 深色字，保证对比度 */
+[data-bs-theme="dark"] .btn-primary {
+    color: #12151c;
+}
+
+[data-bs-theme="dark"] .btn-primary:hover {
+    color: #12151c;
+}
+
+.btn-outline-primary {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #ffffff;
+}
+
+[data-bs-theme="dark"] .btn-outline-primary:hover { color: #12151c; }
 
 /* ==================== 表格 ==================== */
 .table {
@@ -187,41 +451,37 @@ main {
     border-bottom: 1px solid var(--border);
 }
 
-/* ==================== 天气温馨提示行（新增：柔和样式，随深浅色主题自动适配） ==================== */
+.table td, .table th { border-color: var(--border); }
+
+/* ==================== 天气温馨提示行 ==================== */
 .weather-tip {
-    margin-top: 0.35rem;
+    margin-top: 0.6rem;
     color: var(--text-muted);
     background-color: var(--head-bg);
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     padding: 0.25rem 0.6rem;
-    display: inline-block; /* 行内容自适应宽度，手机端居中排版不乱 */
+    display: inline-block;
 }
 
-/* ==================== 成绩模块：统计小卡片（随深浅色主题自动适配） ==================== */
+/* ==================== 成绩模块：统计小卡片 ==================== */
 .stat-box {
     background-color: var(--head-bg);
     border-color: var(--border) !important;
     color: var(--text-main);
+    border-radius: 12px !important;
+    transition: background-color 0.3s ease;
 }
 
 /* ==================== 移动端适配 ==================== */
 @media (max-width: 575.98px) {
-    /* 手机上时钟缩小，避免溢出 */
-    #clock {
-        font-size: 2.2rem;
-    }
+    .wb-clock-num { font-size: 2rem; }
+    .wb-greet { font-size: 1.1rem; }
+    .wb-stats { gap: 0.6rem; }
+    .wb-stat .card-body { padding: 0.7rem 0.8rem; gap: 0.6rem; }
+    .wb-stat-icon { width: 34px; height: 34px; font-size: 1.05rem; }
+    .wb-stat-num { font-size: 1.1rem; }
 
-    #weatherIcon {
-        font-size: 1.6rem !important;
-    }
-
-    /* 卡片内边距收紧，留白更合理 */
-    .card-body {
-        padding: 1rem;
-    }
-
-    .card-header {
-        padding: 0.75rem 1rem;
-    }
+    .card-body { padding: 1rem; }
+    .card-header { padding: 0.75rem 1rem; }
 }
