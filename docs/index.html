@@ -80,8 +80,55 @@
         </div>
     </main>
 
-    <!-- ==================== 页面主体（登录后显示，复刻原版 Index.cshtml 全部模块） ==================== -->
+    <!-- ==================== 页面主体（登录后显示，复刻新版 Index.cshtml 布局） ==================== -->
     <main id="mainContent" class="container py-4 d-none">
+
+        <!-- 欢迎栏：问候语由 JS 按当前时间自动切换（同原版） -->
+        <div class="card wb-welcome mb-3">
+            <div class="card-body">
+                <div class="wb-greet-icon"><i class="bi bi-brightness-high"></i></div>
+                <div class="flex-grow-1">
+                    <div id="greeting" class="wb-greet">你好，同学</div>
+                    <div class="wb-greet-sub" id="wbGreetSub">今天也要元气满满哦</div>
+                </div>
+                <!-- 主题切换按钮（右上角，与导航栏按钮同一逻辑，见 app.js startTheme） -->
+                <button id="themeToggleTop" class="btn wb-theme-btn" type="button"
+                        title="切换浅色/深色模式" aria-label="切换浅色/深色模式">
+                    <i id="themeIconTop" class="bi bi-moon-stars"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 统计指标小卡片：待办总数 / 已完成 / 今日课程（登录后由 JS 填充） -->
+        <div class="wb-stats mb-3">
+            <div class="card wb-stat">
+                <div class="card-body">
+                    <div class="wb-stat-icon"><i class="bi bi-list-check"></i></div>
+                    <div>
+                        <div class="wb-stat-num" id="statTodoTotal">0</div>
+                        <div class="wb-stat-label">待办总数</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card wb-stat">
+                <div class="card-body">
+                    <div class="wb-stat-icon wb-stat-done"><i class="bi bi-check-circle"></i></div>
+                    <div>
+                        <div class="wb-stat-num" id="statTodoDone">0</div>
+                        <div class="wb-stat-label">已完成待办</div>
+                    </div>
+                </div>
+            </div>
+            <div class="card wb-stat">
+                <div class="card-body">
+                    <div class="wb-stat-icon wb-stat-course"><i class="bi bi-calendar-event"></i></div>
+                    <div>
+                        <div class="wb-stat-num" id="statTodayCourse">0</div>
+                        <div class="wb-stat-label">今日课程</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- 操作提示信息（如"课程添加成功"） -->
         <div id="messageAlert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
@@ -89,59 +136,20 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
         </div>
 
-        <!-- 模块一：实时时间 + 日期 + 天气 -->
-        <div class="card mb-4 hero-card">
-            <div class="card-body py-5">
-                <div class="row align-items-center g-4">
-                    <div class="col-12 col-md-7 text-center text-md-start">
-                        <div id="clock" class="display-3">--:--:--</div>
-                        <div id="dateLine" class="fs-5">加载中…</div>
-                    </div>
-                    <div class="col-12 col-md-5 text-center text-md-end">
-                        <div class="fs-1" id="weatherIcon"><i class="bi bi-cloud-question"></i></div>
-                        <div id="weatherText" class="fs-4 fw-semibold">天气加载中…</div>
-                        <div id="weatherSub" class="small text-muted">数据来源：Open-Meteo</div>
-                        <div id="weatherTip" class="weather-tip small d-none"></div>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <!-- ==================== 主体：自适应网格布局（大屏多栏 / 平板两栏 / 手机单列） ==================== -->
+        <div class="wb-grid">
 
-        <!-- 第一行：待办 + 倒计时 -->
-        <div class="row g-4">
-            <!-- 模块二：待办事项（含截止时间高亮） -->
-            <div class="col-12 col-lg-7">
+            <!-- 待办事项（含截止时间高亮） -->
+            <section class="wb-cell wb-todos">
                 <div class="card h-100">
                     <div class="card-header">
-                        <i class="bi bi-check2-square me-1"></i>待办事项
+                        <i class="bi bi-check2-square"></i>待办事项
                         <span id="todoCountBadge" class="badge bg-secondary ms-2">共 0 项</span>
                         <span class="small text-muted ms-2">
                             <span class="legend-soon">临期2天内</span> / <span class="legend-overdue">已过期</span>
                         </span>
                     </div>
-                    <div class="card-body p-4">
-                        <!-- 待办统计面板：总任务 / 已完成 / 未完成 -->
-                        <div class="row g-3 mb-3">
-                            <div class="col-4">
-                                <div class="border rounded text-center py-2 stat-box">
-                                    <div id="todoStatTotal" class="fs-5 fw-bold">0</div>
-                                    <div class="small text-muted">总任务</div>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border rounded text-center py-2 stat-box">
-                                    <div id="todoStatDone" class="fs-5 fw-bold text-success">0</div>
-                                    <div class="small text-muted">已完成</div>
-                                </div>
-                            </div>
-                            <div class="col-4">
-                                <div class="border rounded text-center py-2 stat-box">
-                                    <div id="todoStatUndone" class="fs-5 fw-bold">0</div>
-                                    <div class="small text-muted">未完成</div>
-                                </div>
-                            </div>
-                        </div>
-
+                    <div class="card-body">
                         <!-- 一键清除全部已完成任务 -->
                         <div class="d-flex justify-content-end mb-2">
                             <button id="clearDoneBtn" type="button" class="btn btn-sm btn-outline-secondary">
@@ -168,16 +176,56 @@
                         <div id="todoList"></div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- 模块五：倒计时提醒 -->
-            <div class="col-12 col-lg-5">
+            <!-- 时钟 + 天气卡片（右上） -->
+            <section class="wb-cell wb-clock">
                 <div class="card h-100">
                     <div class="card-header">
-                        <i class="bi bi-hourglass-split me-1"></i>倒计时提醒
+                        <i class="bi bi-clock"></i>时间与天气
+                    </div>
+                    <div class="card-body text-center">
+                        <div id="clock" class="wb-clock-num">--:--:--</div>
+                        <div id="dateLine" class="wb-clock-date">加载中…</div>
+                        <hr class="wb-divider" />
+                        <div class="wb-weather-row">
+                            <span class="wb-weather-icon" id="weatherIcon"><i class="bi bi-cloud-question"></i></span>
+                            <div class="text-start">
+                                <div id="weatherText" class="fw-semibold">天气加载中…</div>
+                                <div id="weatherSub" class="small text-muted">数据来源：Open-Meteo</div>
+                            </div>
+                        </div>
+                        <div id="weatherTip" class="weather-tip small d-none"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习语录卡片（右下，纯前端展示） -->
+            <section class="wb-cell wb-quote">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-chat-quote"></i>学习语录
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="wb-quote-text flex-grow-1" id="quoteText">"学而不思则罔，思而不学则殆。"</div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <span class="small text-muted" id="quoteAuthor">—— 《论语》</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="quoteNext">
+                                <i class="bi bi-arrow-repeat me-1"></i>换一句
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 倒计时提醒（小卡片） -->
+            <section class="wb-cell wb-countdown">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-hourglass-split"></i>倒计时提醒
                         <span id="countdownCountBadge" class="badge bg-secondary ms-2">共 0 项</span>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body">
                         <!-- 新增倒计时表单：事件名称 + 目标日期 -->
                         <form id="addCountdownForm" class="row g-2 mb-3">
                             <div class="col-12 col-sm-6">
@@ -196,19 +244,16 @@
                         <div id="countdownList"></div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- 第二行：常用链接 + 课程表 -->
-        <div class="row g-4 mt-1">
-            <!-- 模块四：常用链接（按分组展示） -->
-            <div class="col-12 col-lg-5">
+            <!-- 常用链接（小卡片，按分组展示） -->
+            <section class="wb-cell wb-links">
                 <div class="card h-100">
                     <div class="card-header">
-                        <i class="bi bi-link-45deg me-1"></i>常用链接
+                        <i class="bi bi-link-45deg"></i>常用链接
                         <span id="linkCountBadge" class="badge bg-secondary ms-2">共 0 条</span>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body">
                         <!-- 新增链接表单：名称 + 网址 + 分组下拉框 -->
                         <form id="addLinkForm" class="row g-2 mb-3">
                             <div class="col-12">
@@ -236,17 +281,17 @@
                         <div id="linkList"></div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- 模块三：课程表（自动高亮今日课程） -->
-            <div class="col-12 col-lg-7">
+            <!-- 课程表（通栏：今日高亮 + 课程低饱和色块） -->
+            <section class="wb-cell wb-schedule">
                 <div class="card h-100">
                     <div class="card-header">
-                        <i class="bi bi-calendar3 me-1"></i>课程表
+                        <i class="bi bi-calendar3"></i>课程表
                         <span id="courseCountBadge" class="badge bg-secondary ms-2">共 0 门</span>
                         <span class="small text-muted ms-2">今天<span id="todayWeekName"></span>，今日课程已高亮</span>
                     </div>
-                    <div class="card-body p-4">
+                    <div class="card-body">
                         <!-- 新增课程表单：星期下拉 + 节次 + 课程名称 + 教室 -->
                         <form id="addCourseForm" class="row g-2 mb-3">
                             <div class="col-6 col-md-2">
@@ -294,74 +339,76 @@
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            </section>
 
-        <!-- 模块六：成绩管理 -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <i class="bi bi-mortarboard me-1"></i>成绩管理
-                <span id="gradeCountBadge" class="badge bg-secondary ms-2">共 0 条</span>
-            </div>
-            <div class="card-body p-4">
-                <!-- 顶部统计小卡片：总学分 / 加权平均分 / 加权 GPA -->
-                <div class="row g-3 mb-4">
-                    <div class="col-4">
-                        <div class="border rounded text-center py-3 stat-box">
-                            <div id="gradeStatCredit" class="fs-4 fw-bold">-</div>
-                            <div class="small text-muted">总学分</div>
-                        </div>
+            <!-- 成绩管理（通栏） -->
+            <section class="wb-cell wb-grades">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-mortarboard"></i>成绩管理
+                        <span id="gradeCountBadge" class="badge bg-secondary ms-2">共 0 条</span>
                     </div>
-                    <div class="col-4">
-                        <div class="border rounded text-center py-3 stat-box">
-                            <div id="gradeStatAvg" class="fs-4 fw-bold">-</div>
-                            <div class="small text-muted">加权平均分</div>
+                    <div class="card-body">
+                        <!-- 顶部统计小卡片：总学分 / 加权平均分 / 加权 GPA -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-4">
+                                <div class="border rounded text-center py-3 stat-box">
+                                    <div id="gradeStatCredit" class="fs-4 fw-bold">-</div>
+                                    <div class="small text-muted">总学分</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded text-center py-3 stat-box">
+                                    <div id="gradeStatAvg" class="fs-4 fw-bold">-</div>
+                                    <div class="small text-muted">加权平均分</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded text-center py-3 stat-box">
+                                    <div id="gradeStatGpa" class="fs-4 fw-bold">-</div>
+                                    <div class="small text-muted">加权 GPA</div>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="border rounded text-center py-3 stat-box">
-                            <div id="gradeStatGpa" class="fs-4 fw-bold">-</div>
-                            <div class="small text-muted">加权 GPA</div>
+
+                        <!-- 新增成绩表单：课程名称 + 学分 + 成绩 -->
+                        <form id="addGradeForm" class="row g-2 mb-3">
+                            <div class="col-12 col-md-5">
+                                <input type="text" name="courseName" class="form-control"
+                                       placeholder="课程名称" required maxlength="50" />
+                            </div>
+                            <div class="col-5 col-md-3">
+                                <input type="text" name="credit" class="form-control"
+                                       placeholder="学分，如 4" required maxlength="10" />
+                            </div>
+                            <div class="col-7 col-md-2">
+                                <input type="text" name="score" class="form-control"
+                                       placeholder="成绩 0-100" required maxlength="10" />
+                            </div>
+                            <div class="col-5 col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg"></i> 添加成绩
+                                </button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>课程名称</th>
+                                        <th>学分</th>
+                                        <th>成绩</th>
+                                        <th>绩点</th>
+                                        <th class="text-end">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="gradeTableBody"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
-
-                <!-- 新增成绩表单：课程名称 + 学分 + 成绩 -->
-                <form id="addGradeForm" class="row g-2 mb-3">
-                    <div class="col-12 col-md-5">
-                        <input type="text" name="courseName" class="form-control"
-                               placeholder="课程名称" required maxlength="50" />
-                    </div>
-                    <div class="col-5 col-md-3">
-                        <input type="text" name="credit" class="form-control"
-                               placeholder="学分，如 4" required maxlength="10" />
-                    </div>
-                    <div class="col-7 col-md-2">
-                        <input type="text" name="score" class="form-control"
-                               placeholder="成绩 0-100" required maxlength="10" />
-                    </div>
-                    <div class="col-5 col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="bi bi-plus-lg"></i> 添加成绩
-                        </button>
-                    </div>
-                </form>
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th>课程名称</th>
-                                <th>学分</th>
-                                <th>成绩</th>
-                                <th>绩点</th>
-                                <th class="text-end">操作</th>
-                            </tr>
-                        </thead>
-                        <tbody id="gradeTableBody"></tbody>
-                    </table>
-                </div>
-            </div>
+            </section>
         </div>
     </main>
 
