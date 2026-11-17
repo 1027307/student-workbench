@@ -343,6 +343,28 @@
         });
         html += "</ul>";
         box.innerHTML = html;
+        renderGoal();
+    }
+
+    // 目标倒计时小卡片：只读展示最近一个未过期目标（与原版 Index.cshtml 的 nextGoal 逻辑一致）
+    function renderGoal() {
+        var box = $("goalBox");
+        if (!box) return;
+        var list = state.Countdowns.filter(function (c) {
+            return daysLeft(c.TargetDate) >= 0;
+        }).sort(function (a, b) {
+            return new Date(a.TargetDate) - new Date(b.TargetDate);
+        });
+        if (list.length === 0) {
+            box.innerHTML = '<p class="text-muted mb-0">暂无进行中的目标<br />' +
+                '<span class="small">可在"倒计时提醒"卡片添加</span></p>';
+            return;
+        }
+        var g = list[0], n = daysLeft(g.TargetDate), d = new Date(g.TargetDate);
+        box.innerHTML = '<div class="wb-goal-name text-truncate">' + escapeHtml(g.Name) + "</div>" +
+            '<div class="wb-goal-days">' + (n === 0 ? "就是今天" : "剩 " + n + " 天") + "</div>" +
+            '<div class="small text-muted">目标日期：' + d.getFullYear() + "-" +
+            pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "</div>";
     }
 
     function bindCountdowns() {
