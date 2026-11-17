@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>工作台首页 - 个人工作台</title>
+
+    <!-- 主题初始化：渲染前读取用户明暗偏好，避免刷新闪烁（同原版 _Layout） -->
+    <script>
+        document.documentElement.setAttribute(
+            'data-bs-theme', localStorage.getItem('wb-theme') || 'light');
+    </script>
+
+    <!-- Bootstrap 5 / Bootstrap Icons / 自定义样式：全部本地资源，不用 CDN -->
+    <link href="lib/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="lib/bootstrap-icons/bootstrap-icons.min.css" rel="stylesheet" />
+    <link href="css/site.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- 顶部导航栏：纯色简洁风格（同原版 _Layout） -->
+    <nav class="navbar navbar-dark navbar-app">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">
+                <i class="bi bi-grid-1x2-fill me-2"></i>个人工作台
+            </span>
+            <span class="d-flex align-items-center gap-2">
+                <!-- GitHub 同步状态小字（保存中…/已同步/同步失败） -->
+                <span id="syncStatus" class="small text-white-50 d-none"></span>
+                <!-- 登录后显示：用户名 + 退出按钮 -->
+                <span id="navUserArea" class="d-none align-items-center gap-2">
+                    <span class="navbar-text small text-white-50 d-none d-sm-inline">
+                        <i class="bi bi-person-fill me-1"></i><span id="navUsername"></span>
+                    </span>
+                    <button id="logoutBtn" type="button" class="btn btn-outline-light btn-sm">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span class="d-none d-sm-inline ms-1">退出登录</span>
+                    </button>
+                </span>
+                <!-- 浅色/深色模式切换按钮 -->
+                <button id="themeToggle" class="btn btn-outline-light btn-sm" type="button"
+                        title="切换浅色/深色模式" aria-label="切换浅色/深色模式">
+                    <i id="themeIcon" class="bi bi-moon"></i>
+                    <span id="themeLabel" class="ms-1 d-none d-sm-inline">深色</span>
+                </button>
+            </span>
+        </div>
+    </nav>
+
+    <!-- ==================== 登录门（未登录时显示，样式参考原版 Login.cshtml） ==================== -->
+    <main id="loginGate" class="container py-4">
+        <div class="row justify-content-center align-items-center" style="min-height: 60vh;">
+            <div class="col-12 col-sm-8 col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header text-center">
+                        <i class="bi bi-person-circle me-1"></i>用户登录
+                    </div>
+                    <div class="card-body p-4">
+                        <div id="loginError" class="alert alert-danger py-2 d-none" role="alert"></div>
+                        <form id="loginForm">
+                            <div class="mb-3">
+                                <label class="form-label" for="loginAccount">账号</label>
+                                <input type="text" class="form-control" id="loginAccount"
+                                       placeholder="请输入账号" required maxlength="30" autofocus />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label" for="loginPassword">密码</label>
+                                <input type="password" class="form-control" id="loginPassword"
+                                       placeholder="请输入密码" required maxlength="30" />
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="bi bi-box-arrow-in-right me-1"></i>登录
+                            </button>
+                        </form>
+                        <p class="text-muted small text-center mt-3 mb-0">
+                            测试账号：admin / 123456　　student / 123456
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ==================== 页面主体（登录后显示，复刻原版 Index.cshtml 全部模块） ==================== -->
+    <main id="mainContent" class="container py-4 d-none">
+
+        <!-- 操作提示信息（如"课程添加成功"） -->
+        <div id="messageAlert" class="alert alert-success alert-dismissible fade show d-none" role="alert">
+            <span id="messageText"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="关闭"></button>
+        </div>
+
+        <!-- 模块一：实时时间 + 日期 + 天气 -->
+        <div class="card mb-4 hero-card">
+            <div class="card-body py-5">
+                <div class="row align-items-center g-4">
+                    <div class="col-12 col-md-7 text-center text-md-start">
+                        <div id="clock" class="display-3">--:--:--</div>
+                        <div id="dateLine" class="fs-5">加载中…</div>
+                    </div>
+                    <div class="col-12 col-md-5 text-center text-md-end">
+                        <div class="fs-1" id="weatherIcon"><i class="bi bi-cloud-question"></i></div>
+                        <div id="weatherText" class="fs-4 fw-semibold">天气加载中…</div>
+                        <div id="weatherSub" class="small text-muted">数据来源：Open-Meteo</div>
+                        <div id="weatherTip" class="weather-tip small d-none"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第一行：待办 + 倒计时 -->
+        <div class="row g-4">
+            <!-- 模块二：待办事项（含截止时间高亮） -->
+            <div class="col-12 col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-check2-square me-1"></i>待办事项
+                        <span id="todoCountBadge" class="badge bg-secondary ms-2">共 0 项</span>
+                        <span class="small text-muted ms-2">
+                            <span class="legend-soon">临期2天内</span> / <span class="legend-overdue">已过期</span>
+                        </span>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 待办统计面板：总任务 / 已完成 / 未完成 -->
+                        <div class="row g-3 mb-3">
+                            <div class="col-4">
+                                <div class="border rounded text-center py-2 stat-box">
+                                    <div id="todoStatTotal" class="fs-5 fw-bold">0</div>
+                                    <div class="small text-muted">总任务</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded text-center py-2 stat-box">
+                                    <div id="todoStatDone" class="fs-5 fw-bold text-success">0</div>
+                                    <div class="small text-muted">已完成</div>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="border rounded text-center py-2 stat-box">
+                                    <div id="todoStatUndone" class="fs-5 fw-bold">0</div>
+                                    <div class="small text-muted">未完成</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 一键清除全部已完成任务 -->
+                        <div class="d-flex justify-content-end mb-2">
+                            <button id="clearDoneBtn" type="button" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>一键清除已完成
+                            </button>
+                        </div>
+
+                        <!-- 新增待办表单：内容 + 可选截止日期 -->
+                        <form id="addTodoForm" class="row g-2 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <input type="text" name="title" class="form-control"
+                                       placeholder="输入待办内容…" required maxlength="100" />
+                            </div>
+                            <div class="col-8 col-sm-4">
+                                <input type="date" name="dueDate" class="form-control" title="截止时间（可选）" />
+                            </div>
+                            <div class="col-4 col-sm-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg"></i> 添加
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="todoList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块五：倒计时提醒 -->
+            <div class="col-12 col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-hourglass-split me-1"></i>倒计时提醒
+                        <span id="countdownCountBadge" class="badge bg-secondary ms-2">共 0 项</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 新增倒计时表单：事件名称 + 目标日期 -->
+                        <form id="addCountdownForm" class="row g-2 mb-3">
+                            <div class="col-12 col-sm-6">
+                                <input type="text" name="name" class="form-control"
+                                       placeholder="事件，如期末考试" required maxlength="30" />
+                            </div>
+                            <div class="col-8 col-sm-4">
+                                <input type="date" name="targetDate" class="form-control" required />
+                            </div>
+                            <div class="col-4 col-sm-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+                            </div>
+                        </form>
+                        <div id="countdownList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 第二行：常用链接 + 课程表 -->
+        <div class="row g-4 mt-1">
+            <!-- 模块四：常用链接（按分组展示） -->
+            <div class="col-12 col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-link-45deg me-1"></i>常用链接
+                        <span id="linkCountBadge" class="badge bg-secondary ms-2">共 0 条</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 新增链接表单：名称 + 网址 + 分组下拉框 -->
+                        <form id="addLinkForm" class="row g-2 mb-3">
+                            <div class="col-12">
+                                <input type="text" name="name" class="form-control"
+                                       placeholder="链接名称" required maxlength="30" />
+                            </div>
+                            <div class="col-7">
+                                <input type="text" name="url" class="form-control"
+                                       placeholder="网址，如 github.com" required maxlength="200" />
+                            </div>
+                            <div class="col-5">
+                                <select name="group" class="form-select">
+                                    <option value="校园系统">校园系统</option>
+                                    <option value="学习工具">学习工具</option>
+                                    <option value="新闻资讯">新闻资讯</option>
+                                    <option value="其他">其他</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg"></i> 添加链接
+                                </button>
+                            </div>
+                        </form>
+                        <div id="linkList"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 模块三：课程表（自动高亮今日课程） -->
+            <div class="col-12 col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-calendar3 me-1"></i>课程表
+                        <span id="courseCountBadge" class="badge bg-secondary ms-2">共 0 门</span>
+                        <span class="small text-muted ms-2">今天<span id="todayWeekName"></span>，今日课程已高亮</span>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- 新增课程表单：星期下拉 + 节次 + 课程名称 + 教室 -->
+                        <form id="addCourseForm" class="row g-2 mb-3">
+                            <div class="col-6 col-md-2">
+                                <select name="weekDay" class="form-select" required>
+                                    <option value="1">周一</option>
+                                    <option value="2">周二</option>
+                                    <option value="3">周三</option>
+                                    <option value="4">周四</option>
+                                    <option value="5">周五</option>
+                                </select>
+                            </div>
+                            <div class="col-6 col-md-2">
+                                <input type="text" name="period" class="form-control"
+                                       placeholder="节次，如 1-2" required maxlength="20" />
+                            </div>
+                            <div class="col-12 col-md-3">
+                                <input type="text" name="name" class="form-control"
+                                       placeholder="课程名称" required maxlength="50" />
+                            </div>
+                            <div class="col-8 col-md-3">
+                                <input type="text" name="room" class="form-control"
+                                       placeholder="上课教室" required maxlength="50" />
+                            </div>
+                            <div class="col-4 col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-plus-lg"></i> 添加课程
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- 课程列表：小屏可横向滚动 -->
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>星期</th>
+                                        <th>节次</th>
+                                        <th>课程名称</th>
+                                        <th>上课教室</th>
+                                        <th class="text-end">操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="courseTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 模块六：成绩管理 -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <i class="bi bi-mortarboard me-1"></i>成绩管理
+                <span id="gradeCountBadge" class="badge bg-secondary ms-2">共 0 条</span>
+            </div>
+            <div class="card-body p-4">
+                <!-- 顶部统计小卡片：总学分 / 加权平均分 / 加权 GPA -->
+                <div class="row g-3 mb-4">
+                    <div class="col-4">
+                        <div class="border rounded text-center py-3 stat-box">
+                            <div id="gradeStatCredit" class="fs-4 fw-bold">-</div>
+                            <div class="small text-muted">总学分</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded text-center py-3 stat-box">
+                            <div id="gradeStatAvg" class="fs-4 fw-bold">-</div>
+                            <div class="small text-muted">加权平均分</div>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border rounded text-center py-3 stat-box">
+                            <div id="gradeStatGpa" class="fs-4 fw-bold">-</div>
+                            <div class="small text-muted">加权 GPA</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 新增成绩表单：课程名称 + 学分 + 成绩 -->
+                <form id="addGradeForm" class="row g-2 mb-3">
+                    <div class="col-12 col-md-5">
+                        <input type="text" name="courseName" class="form-control"
+                               placeholder="课程名称" required maxlength="50" />
+                    </div>
+                    <div class="col-5 col-md-3">
+                        <input type="text" name="credit" class="form-control"
+                               placeholder="学分，如 4" required maxlength="10" />
+                    </div>
+                    <div class="col-7 col-md-2">
+                        <input type="text" name="score" class="form-control"
+                               placeholder="成绩 0-100" required maxlength="10" />
+                    </div>
+                    <div class="col-5 col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-plus-lg"></i> 添加成绩
+                        </button>
+                    </div>
+                </form>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>课程名称</th>
+                                <th>学分</th>
+                                <th>成绩</th>
+                                <th>绩点</th>
+                                <th class="text-end">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="text-center text-muted py-3 small">
+        课程作业示例 &copy; <span id="footerYear">2026</span> 个人工作台
+    </footer>
+
+    <!-- Bootstrap JS（含 Popper）：本地资源 -->
+    <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
