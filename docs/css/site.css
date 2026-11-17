@@ -242,7 +242,8 @@ main {
 
 /* 平板：两栏 */
 @media (min-width: 576px) {
-    .wb-clock, .wb-quote, .wb-countdown, .wb-links { grid-column: span 6; }
+    .wb-clock, .wb-quote, .wb-countdown, .wb-links,
+    .wb-pomodoro, .wb-hot, .wb-goal, .wb-poem, .wb-english { grid-column: span 6; }
 }
 
 /* 大屏：多栏 */
@@ -250,6 +251,8 @@ main {
     .wb-todos { grid-column: span 7; grid-row: span 2; }
     .wb-clock, .wb-quote { grid-column: span 5; }
     .wb-countdown, .wb-links { grid-column: span 6; }
+    .wb-pomodoro, .wb-hot, .wb-goal { grid-column: span 4; }
+    .wb-poem, .wb-english { grid-column: span 6; }
     .wb-schedule, .wb-grades { grid-column: span 12; }
 }
 
@@ -471,6 +474,137 @@ main {
     color: var(--text-main);
     border-radius: 12px !important;
     transition: background-color 0.3s ease;
+}
+
+/* ==================== 新增小卡片：番茄钟 / 热榜 / 目标倒计时 / 英文短句 ==================== */
+
+/* 番茄钟 */
+.wb-pomo-mode {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 0.2rem 0.9rem;
+    align-self: center;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.wb-pomo-mode.is-break {
+    color: var(--subj2-fg);
+    background: var(--subj2-bg);
+}
+
+.wb-pomo-time {
+    font-size: 2.4rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.05em;
+    color: var(--text-main);
+    line-height: 1.2;
+    margin: 0.5rem 0 0.4rem;
+}
+
+.wb-pomo-bar {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--head-bg);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.wb-pomo-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 999px;
+    transition: width 0.5s linear;
+}
+
+/* 实时热榜：固定高度可滚动，单卡片失败不影响页面 */
+.wb-hot-list {
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.wb-hot-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.55rem;
+    padding: 0.38rem 0.25rem;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.88rem;
+}
+
+.wb-hot-item:last-child { border-bottom: 0; }
+
+.wb-hot-rank {
+    flex-shrink: 0;
+    width: 1.5rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    background: var(--head-bg);
+    border-radius: 6px;
+}
+
+/* 前三名用主色强调 */
+.wb-hot-rank.top1 { color: #fff; background: var(--overdue-border); }
+.wb-hot-rank.top2 { color: #fff; background: var(--soon-border); }
+.wb-hot-rank.top3 { color: #fff; background: var(--accent); }
+
+.wb-hot-title {
+    flex-grow: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+    text-decoration: none;
+}
+
+.wb-hot-title:hover { color: var(--accent); }
+
+.wb-hot-heat {
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.wb-hot-error {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 1.2rem 0;
+    font-size: 0.88rem;
+}
+
+/* 目标倒计时 */
+.wb-goal-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-main);
+}
+
+.wb-goal-days {
+    font-size: 1.9rem;
+    font-weight: 700;
+    color: var(--accent);
+    margin: 0.35rem 0 0.15rem;
+}
+
+/* 每日英文短句 */
+.wb-en-text {
+    font-size: 1rem;
+    font-weight: 500;
+    font-style: italic;
+    color: var(--text-main);
+    line-height: 1.7;
+    padding: 0.6rem 0.9rem;
+    border-left: 4px solid var(--subj4-fg);
+    background: var(--subj4-bg);
+    border-radius: 0 10px 10px 0;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* ==================== 移动端适配 ==================== */
