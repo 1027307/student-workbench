@@ -1,0 +1,227 @@
+/* ============================================================
+   全局样式：简约清爽的学生作业风格 + 浅色/深色双主题
+   - 颜色全部走 CSS 变量，切换主题由 Bootstrap 的
+     <html data-bs-theme="dark"> 控制，本文件覆盖自定义变量即可整体换肤
+   - 无渐变、无悬停动画，卡片加大留白与间距
+   ============================================================ */
+
+/* ---------- 浅色主题变量（默认） ---------- */
+:root {
+    --accent: #3b82f6;        /* 唯一点缀色（蓝） */
+    --page-bg: #f5f7fa;       /* 页面背景 */
+    --card-bg: #ffffff;       /* 卡片背景 */
+    --border: #e5e9f0;        /* 卡片细边框 */
+    --text-main: #334155;     /* 主文字 */
+    --text-muted: #94a3b8;    /* 次要文字 */
+    --head-bg: #f8fafc;       /* 表头/卡片头背景 */
+    --done-bg: #f1f5f9;       /* 已完成待办底色 */
+    --soon-bg: #fff8e1;       /* 临期待办底色（黄） */
+    --soon-border: #ffc107;
+    --overdue-bg: #fdecea;    /* 过期待办底色（红） */
+    --overdue-border: #dc3545;
+    --today-bg: #e8f4ec;      /* 今日课程行底色（绿） */
+    --today-border: #2e9e57;
+}
+
+/* ---------- 深色主题变量 ---------- */
+[data-bs-theme="dark"] {
+    --accent: #5b8def;
+    --page-bg: #171c26;
+    --card-bg: #1f2633;
+    --border: #323b4d;
+    --text-main: #d5dbe6;
+    --text-muted: #8a94a6;
+    --head-bg: #262f3f;
+    --done-bg: #262f3f;
+    --soon-bg: #3a3012;
+    --soon-border: #d9a406;
+    --overdue-bg: #40232a;
+    --overdue-border: #e35d6a;
+    --today-bg: #23362c;
+    --today-border: #3fae6e;
+}
+
+body {
+    background-color: var(--page-bg);
+    color: var(--text-main);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+main {
+    flex: 1; /* 页脚贴底 */
+}
+
+/* 顶部导航：纯色简洁 */
+.navbar-app {
+    background-color: var(--accent);
+}
+
+/* ==================== 卡片：白底细边框 + 加大留白 ==================== */
+.card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    background-color: var(--head-bg);
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+    padding: 1rem 1.5rem; /* 卡片头留白加大 */
+}
+
+/* ==================== 时间/天气卡片 ==================== */
+#clock {
+    font-variant-numeric: tabular-nums; /* 等宽数字，跳动不抖动 */
+    letter-spacing: 0.05em;
+    color: var(--accent);
+    font-weight: 700;
+}
+
+#dateLine {
+    color: var(--text-muted);
+}
+
+#weatherIcon {
+    color: var(--accent);
+}
+
+/* ==================== 待办事项状态样式 ==================== */
+/* 未完成：正常底色 */
+.todo-active {
+    background-color: var(--card-bg);
+}
+
+/* 已完成：浅灰底 + 删除线 + 灰字 */
+.todo-done {
+    background-color: var(--done-bg);
+}
+
+.todo-done .todo-title {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+/* 临期（距截止 2 天内）：黄色高亮 + 左侧黄色竖条 */
+.todo-soon {
+    background-color: var(--soon-bg);
+    border-left: 4px solid var(--soon-border);
+}
+
+/* 已过期：红色标记 + 左侧红色竖条 */
+.todo-overdue {
+    background-color: var(--overdue-bg);
+    border-left: 4px solid var(--overdue-border);
+}
+
+.todo-overdue .todo-title {
+    color: var(--overdue-border);
+    font-weight: 600;
+}
+
+/* 卡片头图例小字 */
+.legend-soon { color: var(--soon-border); }
+.legend-overdue { color: var(--overdue-border); }
+
+/* ==================== 课程表：今日课程高亮 ==================== */
+.course-today {
+    background-color: var(--today-bg) !important;
+}
+
+.course-today td:first-child {
+    border-left: 4px solid var(--today-border);
+}
+
+/* ==================== 链接分组小标题 ==================== */
+.link-group-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.25rem 0;
+    border-bottom: 1px dashed var(--border);
+    margin-bottom: 0.25rem;
+}
+
+/* ==================== 表单元素：简洁风格 ==================== */
+.form-control,
+.form-select {
+    border-color: var(--border);
+    border-radius: 0.375rem;
+    font-size: 0.9rem;
+    background-color: var(--card-bg);
+    color: var(--text-main);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.15rem rgba(59, 130, 246, 0.15);
+}
+
+.btn {
+    font-size: 0.9rem;
+    border-radius: 0.375rem;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+.btn-primary:hover {
+    background-color: #2f6fe0;
+    border-color: #2f6fe0;
+}
+
+/* ==================== 表格 ==================== */
+.table {
+    font-size: 0.92rem;
+}
+
+.table thead th {
+    background-color: var(--head-bg);
+    color: var(--text-muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+}
+
+/* ==================== 天气温馨提示行（新增：柔和样式，随深浅色主题自动适配） ==================== */
+.weather-tip {
+    margin-top: 0.35rem;
+    color: var(--text-muted);
+    background-color: var(--head-bg);
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.6rem;
+    display: inline-block; /* 行内容自适应宽度，手机端居中排版不乱 */
+}
+
+/* ==================== 成绩模块：统计小卡片（随深浅色主题自动适配） ==================== */
+.stat-box {
+    background-color: var(--head-bg);
+    border-color: var(--border) !important;
+    color: var(--text-main);
+}
+
+/* ==================== 移动端适配 ==================== */
+@media (max-width: 575.98px) {
+    /* 手机上时钟缩小，避免溢出 */
+    #clock {
+        font-size: 2.2rem;
+    }
+
+    #weatherIcon {
+        font-size: 1.6rem !important;
+    }
+
+    /* 卡片内边距收紧，留白更合理 */
+    .card-body {
+        padding: 1rem;
+    }
+
+    .card-header {
+        padding: 0.75rem 1rem;
+    }
+}
