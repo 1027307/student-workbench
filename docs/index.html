@@ -283,6 +283,94 @@
                 </div>
             </section>
 
+            <!-- 番茄钟（纯前端小卡片，见 extras.js） -->
+            <section class="wb-cell wb-pomodoro">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-alarm"></i>番茄钟
+                    </div>
+                    <div class="card-body text-center d-flex flex-column">
+                        <div class="wb-pomo-mode" id="pomoMode">专注模式</div>
+                        <div class="wb-pomo-time" id="pomoTime">25:00</div>
+                        <div class="wb-pomo-bar"><div class="wb-pomo-fill" id="pomoFill"></div></div>
+                        <div class="d-flex justify-content-center gap-2 mt-3">
+                            <button type="button" id="pomoStart" class="btn btn-sm btn-primary">
+                                <i class="bi bi-play-fill me-1"></i>开始
+                            </button>
+                            <button type="button" id="pomoReset" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-arrow-counterclockwise me-1"></i>重置
+                            </button>
+                        </div>
+                        <div class="small text-muted mt-2" id="pomoHint">专注 25 分钟 · 休息 5 分钟</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 实时热榜（前端调公开 API，失败不影响其它模块，见 extras.js） -->
+            <section class="wb-cell wb-hot">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-fire"></i>实时热榜
+                        <span class="small text-muted ms-2" id="hotSource">微博热搜</span>
+                    </div>
+                    <div class="card-body">
+                        <div id="hotList" class="wb-hot-list">
+                            <p class="text-muted text-center py-3 mb-0">热榜加载中…</p>
+                        </div>
+                        <div class="text-center mt-2 d-none" id="hotRetry">
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="hotRetryBtn">
+                                <i class="bi bi-arrow-repeat me-1"></i>重新加载
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 目标倒计时（只读展示最近一个未过期目标，数据来自同步的倒计时列表，见 app.js renderGoal） -->
+            <section class="wb-cell wb-goal">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-bullseye"></i>目标倒计时
+                    </div>
+                    <div class="card-body text-center d-flex flex-column justify-content-center">
+                        <div id="goalBox">
+                            <p class="text-muted mb-0">加载中…</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 随机古诗词（hitokoto 诗词接口 + 内置兜底，见 extras.js） -->
+            <section class="wb-cell wb-poem">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-brush"></i>随机古诗词
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="wb-quote-text flex-grow-1" id="poemText">"腹有诗书气自华。"</div>
+                        <div class="d-flex align-items-center justify-content-between mt-2">
+                            <span class="small text-muted" id="poemFrom">—— 《和董传留别》· 苏轼</span>
+                            <button type="button" class="btn btn-sm btn-outline-primary" id="poemNext">
+                                <i class="bi bi-shuffle me-1"></i>换一句
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 每日英文短句（zenquotes 今日一句 + 内置兜底，见 extras.js） -->
+            <section class="wb-cell wb-english">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <i class="bi bi-translate"></i>每日英文短句
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <div class="wb-en-text flex-grow-1" id="enText">Loading today's quote…</div>
+                        <div class="small text-muted mt-2" id="enAuthor"></div>
+                    </div>
+                </div>
+            </section>
+
             <!-- 课程表（通栏：今日高亮 + 课程低饱和色块） -->
             <section class="wb-cell wb-schedule">
                 <div class="card h-100">
@@ -419,6 +507,7 @@
 
     <!-- Bootstrap JS（含 Popper）：本地资源 -->
     <script src="lib/bootstrap/bootstrap.bundle.min.js"></script>
+    <script src="js/extras.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
