@@ -231,9 +231,9 @@
         var todos = state.Todos.slice().sort(function (a, b) { return a.Id - b.Id; });
         var done = todos.filter(function (t) { return t.IsDone; }).length;
         $("todoCountBadge").textContent = "共 " + todos.length + " 项";
-        $("todoStatTotal").textContent = todos.length;
-        $("todoStatDone").textContent = done;
-        $("todoStatUndone").textContent = todos.length - done;
+        // 顶部统计小卡片：待办总数 / 已完成待办
+        $("statTodoTotal").textContent = todos.length;
+        $("statTodoDone").textContent = done;
         $("clearDoneBtn").disabled = done === 0;
 
         var box = $("todoList");
@@ -430,6 +430,15 @@
         return d === 0 ? 7 : d;
     }
 
+    // 按课程名称生成稳定的低饱和色块编号（与原版 Index.cshtml 的哈希规则一致：
+    // h = (h*31 + char) % 100003，再 % 6 + 1，同一门课颜色固定）
+    function subjColorIndex(name) {
+        var h = 0;
+        var s = String(name == null ? "" : name);
+        for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003;
+        return h % 6 + 1;
+    }
+
     function renderCourses() {
         var courses = state.Courses.slice().sort(function (a, b) {
             return a.WeekDay - b.WeekDay || String(a.Period).localeCompare(String(b.Period), "zh");
@@ -437,6 +446,10 @@
         $("courseCountBadge").textContent = "共 " + courses.length + " 门";
         var today = todayWeekDay();
         $("todayWeekName").textContent = WEEK_NAMES[today] || "";
+        // 顶部统计小卡片：今日课程数量
+        $("statTodayCourse").textContent = courses.filter(function (c) {
+            return c.WeekDay === today;
+        }).length;
         var body = $("courseTableBody");
         if (courses.length === 0) {
             body.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-3">暂无课程，请在上方添加</td></tr>';
@@ -445,12 +458,12 @@
         var html = "";
         courses.forEach(function (c) {
             html += '<tr class="' + (c.WeekDay === today ? "course-today" : "") + '">';
-            html += "<td><span class=\"badge bg-info text-dark\">" + escapeHtml(WEEK_NAMES[c.WeekDay] || "") + "</span>";
+            html += '<td><span class="subj-day">' + escapeHtml(WEEK_NAMES[c.WeekDay] || "") + "</span>";
             if (c.WeekDay === today) html += ' <span class="badge bg-success ms-1">今天</span>';
             html += "</td>";
-            html += "<td>" + escapeHtml(c.Period) + "</td>";
-            html += '<td class="fw-semibold">' + escapeHtml(c.Name) + "</td>";
-            html += "<td>" + escapeHtml(c.Room) + "</td>";
+            html += '<td class="wb-period">' + escapeHtml(c.Period) + "</td>";
+            html += '<td><span class="subj subj-' + subjColorIndex(c.Name) + '">' + escapeHtml(c.Name) + "</span></td>";
+            html += '<td><i class="bi bi-geo-alt wb-room-icon"></i>' + escapeHtml(c.Room) + "</td>";
             html += '<td class="text-end"><button type="button" class="btn btn-sm btn-outline-danger" data-del="' +
                 c.Id + '" data-name="' + escapeHtml(c.Name) + '"><i class="bi bi-trash"></i> 删除</button></td>';
             html += "</tr>";
@@ -668,21 +681,77 @@
         setInterval(start, 10 * 60 * 1000);
     }
 
-    // ==================== 主题切换（同原版 theme.js） ====================
+    // ==================== 欢迎栏：问候语 + 日期副标题（同原版 Index.cshtml 内联脚本） ====================
+
+    function startGreeting() {
+        var h = new Date().getHours();
+        $("greeting").textContent =
+            h < 6 ? "夜深了，同学" : h < 12 ? "早上好，同学" : h < 18 ? "下午好，同学" : "晚上好，同学";
+        var now = new Date();
+        var weekNamesCn = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+        $("wbGreetSub").textContent = now.getFullYear() + "年" + pad(now.getMonth() + 1) + "月" +
+            pad(now.getDate()) + "日 · " + weekNamesCn[now.getDay()] + " · 今天也要元气满满哦";
+    }
+
+    // ==================== 学习语录：内置名言语料，随机展示 + 手动换一句 ====================
+
+    function startQuotes() {
+        var quotes = [
+            ["学而不思则罔，思而不学则殆。", "《论语》"],
+            ["千里之行，始于足下。", "《老子》"],
+            ["书山有路勤为径，学海无涯苦作舟。", "韩愈"],
+            ["不积跬步，无以至千里。", "《荀子·劝学》"],
+            ["温故而知新，可以为师矣。", "《论语》"],
+            ["业精于勤，荒于嬉；行成于思，毁于随。", "韩愈"],
+            ["三更灯火五更鸡，正是男儿读书时。", "颜真卿"],
+            ["纸上得来终觉浅，绝知此事要躬行。", "陆游"],
+            ["成功 = 汗水 + 坚持 + 一点点运气。", "爱迪生"]
+        ];
+        var textEl = $("quoteText"), authorEl = $("quoteAuthor"), btnEl = $("quoteNext");
+        var last = -1;
+        function show(i) {
+            textEl.textContent = "\u201C" + quotes[i][0] + "\u201D";
+            authorEl.textContent = "—— " + quotes[i][1];
+        }
+        function next() {
+            var i = Math.floor(Math.random() * quotes.length);
+            if (i === last) i = (i + 1) % quotes.length;
+            last = i;
+            show(i);
+        }
+        btnEl.addEventListener("click", next);
+        next();
+    }
+
+    // ==================== 主题切换（同原版 theme.js：导航栏 + 欢迎栏两个按钮统一绑定） ====================
 
     function startTheme() {
         var KEY = "wb-theme";
-        var btn = $("themeToggle"), icon = $("themeIcon"), label = $("themeLabel");
+        var buttons = [
+            { btn: $("themeToggle"), icon: $("themeIcon"), label: $("themeLabel") },
+            { btn: $("themeToggleTop"), icon: $("themeIconTop"), label: null }
+        ].filter(function (t) { return t.btn; });
+
         function render(theme) {
-            if (theme === "dark") { icon.className = "bi bi-sun"; label.textContent = "浅色"; }
-            else { icon.className = "bi bi-moon"; label.textContent = "深色"; }
+            buttons.forEach(function (t) {
+                if (!t.icon) return;
+                if (theme === "dark") {
+                    t.icon.className = t.label ? "bi bi-sun" : "bi bi-sun-fill";
+                    if (t.label) t.label.textContent = "浅色";
+                } else {
+                    t.icon.className = t.label ? "bi bi-moon" : "bi bi-moon-stars";
+                    if (t.label) t.label.textContent = "深色";
+                }
+            });
         }
-        btn.addEventListener("click", function () {
-            var current = document.documentElement.getAttribute("data-bs-theme") === "dark" ? "dark" : "light";
-            var next = current === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-bs-theme", next);
-            localStorage.setItem(KEY, next);
-            render(next);
+        buttons.forEach(function (t) {
+            t.btn.addEventListener("click", function () {
+                var current = document.documentElement.getAttribute("data-bs-theme") === "dark" ? "dark" : "light";
+                var next = current === "dark" ? "light" : "dark";
+                document.documentElement.setAttribute("data-bs-theme", next);
+                localStorage.setItem(KEY, next);
+                render(next);
+            });
         });
         render(localStorage.getItem(KEY) === "dark" ? "dark" : "light");
     }
@@ -743,6 +812,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
         $("footerYear").textContent = String(new Date().getFullYear());
+        startGreeting();
+        startQuotes();
         startClock();
         startWeather();
         startTheme();
